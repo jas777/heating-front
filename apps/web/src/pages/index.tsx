@@ -1,9 +1,9 @@
-import styles from './app.module.scss';
-
 import {useRef} from "react";
 import styled from 'styled-components';
 import { useAxios } from 'use-axios-client';
 import axios from 'axios';
+import ConfigDTO from "../shared/dto/ConfigDTO";
+import HeaterCard from "../shared/components/HeaterCard";
 
 export function Home() {
 

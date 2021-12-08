@@ -1,3 +1,5 @@
+
 export const environment = {
-  production: true
+  production: true,
+  baseUrl: '127.0.0.1'
 };

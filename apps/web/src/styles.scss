@@ -1,1 +1,22 @@
 /* You can add global styles to this file, and also import other style files */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@tailwind screens;
+
+.heater-mode {
+  /*width: fit-content;*/
+}
+
+.heater-mode-info {
+  @apply flex h-20 font-bold text-white items-center pt-8 px-4 text-3xl;
+}
+
+body {
+  @apply overflow-x-hidden;
+}
+
+input[type="number"] {
+  @apply border-b border-indigo-500 mx-2 w-auto;
+}
