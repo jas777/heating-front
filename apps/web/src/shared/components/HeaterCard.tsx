@@ -1,28 +1,9 @@
-import axios from "axios";
-import {useState} from "react";
-import Heater from "../dto/Heater";
+import {environment} from "../../environments/environment";
+import {useHeater, Heater} from "@heating-front/utils";
 
 const HeaterCard = (props: Heater & { className?: string }) => {
 
-  const [isAuto, setAuto] = useState(props.auto);
-
-  const toggle = () => {
-    axios.post(`${process.env.REACT_APP_BASE_URL}/toggle/${props.gpio}`).then(r => {
-      setAuto(!isAuto)
-    })
-  }
-
-  const enable = () => {
-    axios.post(`${process.env.REACT_APP_BASE_URL}/enable/${props.gpio}`).then(r => {
-      setAuto(false);
-    })
-  }
-
-  const disable = () => {
-    axios.post(`${process.env.REACT_APP_BASE_URL}/disable/${props.gpio}`).then(r => {
-      setAuto(false);
-    })
-  }
+  const {isAuto, setAuto, disable, toggle, enable} = useHeater(props.auto, environment.baseUrl, props.gpio);
 
   return (
     <div className={`w-48 select-none flex flex-col shadow-lg ${props.className}`}>

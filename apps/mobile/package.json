@@ -7,6 +7,9 @@
     "@testing-library/react-native": "*",
     "react": "*",
     "react-native": "*",
-    "react-native-svg": "*"
+    "react-native-svg": "*",
+    "styled-components": "*",
+    "use-axios-client": "*",
+    "axios": "*"
   }
 }

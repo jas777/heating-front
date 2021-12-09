@@ -26,7 +26,13 @@
         "entryFile": "apps/mobile/src/main.tsx",
         "platform": "ios",
         "bundleOutput": "dist/apps/mobile/ios/main.jsbundle"
-      }
+      },
+      "fileReplacements": [
+        {
+          "replace": "apps/mobile/src/environments/environment.ts",
+          "with": "apps/mobile/src/environments/environment.prod.ts"
+        }
+      ]
     },
     "run-android": {
       "executor": "@nrwl/react-native:run-android",
@@ -38,6 +44,12 @@
         "apps/mobile/android/app/build/outputs/bundle",
         "apps/mobile/android/app/build/outputs/apk"
       ],
+      "fileReplacements": [
+        {
+          "replace": "apps/mobile/src/environments/environment.ts",
+          "with": "apps/mobile/src/environments/environment.prod.ts"
+        }
+      ],
       "options": {}
     },
     "bundle-android": {
@@ -46,7 +58,13 @@
         "entryFile": "apps/mobile/src/main.tsx",
         "platform": "android",
         "bundleOutput": "dist/apps/mobile/android/main.jsbundle"
-      }
+      },
+      "fileReplacements": [
+        {
+          "replace": "apps/mobile/src/environments/environment.ts",
+          "with": "apps/mobile/src/environments/environment.prod.ts"
+        }
+      ]
     },
     "sync-deps": {
       "executor": "@nrwl/react-native:sync-deps",

@@ -7,7 +7,7 @@ import {
   View,
   Text,
   StatusBar,
-  TouchableOpacity,
+  TouchableOpacity, FlatList,
 } from 'react-native';
 
 import {
@@ -17,75 +17,45 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 // @ts-ignore
 import openURLInBrowser from 'react-native/Libraries/Core/Devtools/openURLInBrowser';
-import Star from './star.svg';
+import styled from 'styled-components';
+import {useAxios} from "use-axios-client";
+import environment from "../environments/environment";
+import {ConfigDTO, Heater} from "@heating-front/utils";
+import HeaterCard from "../components/HeaterCard";
+import axios from "axios";
 
 const App = () => {
+
+  const HeadingText = styled(Text)`
+    color: #4F46E5;
+    font-size: 30px;
+    margin: 5px auto auto;
+    font-weight: bold;
+    background-color: transparent;
+  `
+
+  const {data, error, loading} = { data: '', error: '', loading: '' };
+
+  axios.get(`${environment.baseUrl}/config`).then(d => console.log(d))
+
+  const {data: heatersInLoop} = useAxios<{ in_loop: number[] }>({
+    url: `${environment.baseUrl}/inloop`
+  });
+
+  console.log(error?.message ?? '');
+
   return (
     <>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="dark-content"/>
       <SafeAreaView>
-        <ScrollView
+        <FlatList
           contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}
-        >
-          <View style={styles.header}>
-            <Image style={styles.logo} source={require('./logo.png')} />
-            <Text style={styles.heading} testID="heading">
-              Welcome to Mobile
-            </Text>
-          </View>
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>apps/mobile/App.tsx</Text>{' '}
-                to change this screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions /> Alternatively, press{' '}
-                <Text style={styles.highlight}>R</Text> in the bundler terminal
-                window.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <TouchableOpacity
-                accessibilityRole="button"
-                onPress={() => openURLInBrowser('https://nx.dev')}
-                testID="nx-link"
-              >
-                <Text style={styles.sectionDescription}>
-                  Visit <Text style={styles.link}>nx.dev</Text> for more info
-                  about Nx.
-                </Text>
-              </TouchableOpacity>
-
-              <Text style={styles.sectionDescription}>
-                Thank you for using and showing some ♥ for Nx. If you like Nx,
-                please give it a star:
-              </Text>
-
-              <View style={styles.githubStarContainer}>
-                <TouchableOpacity
-                  style={styles.githubStarBadge}
-                  onPress={() => openURLInBrowser('https://github.com/nrwl/nx')}
-                >
-                  <Star width={24} height={24} fill={Colors.dark} />
-                  <Text> Star</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </ScrollView>
+          ListHeaderComponent={<HeadingText>Sterownik ogrzewania</HeadingText>}
+          ListEmptyComponent={<Text style={{marginTop: 10, marginLeft: 10}}>Pobieranie danych...</Text>}
+          data={data?.heaters ?? []}
+          keyExtractor={(i) => i.gpio.toString()}
+          renderItem={({item}) => <HeaterCard name={item.name} gpio={item.gpio} active={item.active}
+                                              auto={heatersInLoop.in_loop.includes(item.gpio)}/>}/>
       </SafeAreaView>
     </>
   );

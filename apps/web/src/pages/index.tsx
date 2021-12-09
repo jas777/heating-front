@@ -2,17 +2,18 @@ import {useRef} from "react";
 import styled from 'styled-components';
 import { useAxios } from 'use-axios-client';
 import axios from 'axios';
-import ConfigDTO from "../shared/dto/ConfigDTO";
+import {ConfigDTO} from "@heating-front/utils";
 import HeaterCard from "../shared/components/HeaterCard";
+import {environment} from "../environments/environment";
 
 export function Home() {
 
   const {data, loading} = useAxios<ConfigDTO>({
-    url: `${process.env.REACT_APP_BASE_URL}/config`
+    url: `${environment.baseUrl}/config`
   });
 
   const {data: heatersInLoop} = useAxios<{ in_loop: number[] }>({
-    url: `${process.env.REACT_APP_BASE_URL}/inloop`
+    url: `${environment.baseUrl}/inloop`
   });
 
   const StyledHeater = styled(HeaterCard)`
@@ -32,7 +33,7 @@ export function Home() {
 
     if (!intervalRef.current || !durationRef.current) return;
 
-    axios.put(`${process.env.REACT_APP_BASE_URL}/update`, {
+    axios.put(`${environment.baseUrl}/update`, {
       interval: Number(intervalRef.current.value),
       duration: Number(durationRef.current.value)
     })

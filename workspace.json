@@ -1,6 +1,7 @@
 {
   "version": 2,
   "projects": {
+    "utils": "libs/utils",
     "mobile": "apps/mobile",
     "mobile-e2e": "apps/mobile-e2e",
     "web": "apps/web",
