@@ -10,6 +10,7 @@
     "react-native-svg": "*",
     "styled-components": "*",
     "use-axios-client": "*",
-    "axios": "*"
+    "axios": "*",
+    "tailwindcss": "*"
   }
 }
