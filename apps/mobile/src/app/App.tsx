@@ -34,16 +34,28 @@ const App = () => {
     background-color: transparent;
   `;
 
-  const { data, error, loading, refetch } = useAxios<ConfigDTO>(`${environment.baseUrl}/config`);
+  const { data, error, loading, refetch } = useAxios<ConfigDTO>({
+    url: `${environment.baseUrl}/config`,
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  console.log(data);
 
   const [getData, loopData] = useLazyAxios<{ in_loop: number[] }>({
-    url: `${environment.baseUrl}/inloop`
+    url: `${environment.baseUrl}/inloop`,
+    headers: {
+      Accept: 'application/json',
+    },
   });
+
+  axios.get(`${environment.baseUrl}/inloop`).then((data) => console.log(data.data));
 
   const [inLoop, setInLoop] = useState(loopData?.data?.in_loop ?? []);
 
   React.useEffect(() => {
-    getData();
+    getData().catch(e => console.log(e));
   }, []);
 
   React.useEffect(
@@ -78,7 +90,7 @@ const App = () => {
           // style={{ minHeight: Dimensions.get("window").height }}
           contentInsetAdjustmentBehavior="automatic"
           ListHeaderComponent={<HeadingText>Sterownik ogrzewania</HeadingText>}
-          ListEmptyComponent={<Text style={{ marginTop: 10, marginLeft: 10 }}>Pobieranie danych...</Text>}
+          ListEmptyComponent={<Text style={{ marginTop: 10, marginLeft: 10 }}>{  }</Text>}
           data={data?.heaters ?? []}
           extraData={inLoop}
           keyExtractor={(i) => i.gpio.toString()}
