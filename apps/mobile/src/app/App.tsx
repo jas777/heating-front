@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { ReactNode, useState } from "react";
 import {
   SafeAreaView,
   StyleSheet,
@@ -7,7 +7,7 @@ import {
   View,
   Text,
   StatusBar,
-  TouchableOpacity, FlatList, Dimensions, RefreshControl
+  TouchableOpacity, FlatList, Dimensions, RefreshControl, useColorScheme, ActivityIndicator
 } from "react-native";
 
 import {
@@ -17,160 +17,110 @@ import {
 } from "react-native/Libraries/NewAppScreen";
 // @ts-ignore
 import openURLInBrowser from "react-native/Libraries/Core/Devtools/openURLInBrowser";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { DarkTheme, DefaultTheme, NavigationContainer } from "@react-navigation/native";
+import HomeScreen from "../components/HomeScreen";
+import RadiatorIcon from "../assets/svg/RadiatorIcon.svg";
+import CogIcon from "../assets/svg/CogIcon.svg";
+import colors from "tailwindcss/colors";
+import Config from "../shared/Config";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { isConfig } from "../main";
 import styled from "styled-components";
-import { useAxios, useLazyAxios } from "use-axios-client";
-import environment from "../environments/environment";
-import { ConfigDTO, Heater } from "@heating-front/utils";
-import HeaterCard from "../components/HeaterCard";
-import axios from "axios";
+
+const GlobalStateContext = React.createContext<Config | undefined>(undefined);
+
+const lightNavigationTheme = {
+  ...DefaultTheme,
+  dark: false,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: colors.pink["500"],
+    background: '#fff',
+    card: colors.gray["100"],
+    border: colors.gray["300"]
+  }
+}
+
+const darkNavigationTheme = {
+  ...DarkTheme,
+  dark: true,
+  colors: {
+    ...DarkTheme.colors,
+    primary: colors.pink["500"],
+    // background: '#fff',
+    card: colors.gray["900"],
+    border: colors.gray["800"]
+  }
+}
+
+const StyledIndicatorView = styled(View)`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+`
 
 const App = () => {
 
-  const HeadingText = styled(Text)`
-    color: #4F46E5;
-    font-size: 30px;
-    margin: 5px auto auto;
-    font-weight: bold;
-    background-color: transparent;
-  `;
+  const scheme = useColorScheme();
 
-  const { data, error, loading, refetch } = useAxios<ConfigDTO>({
-    url: `${environment.baseUrl}/config`,
-    headers: {
-      Accept: 'application/json',
-    },
-  });
+  function SettingsScreen() {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Settings!</Text>
+      </View>
+    );
+  }
 
-  console.log(data);
+  const Tab = createBottomTabNavigator();
 
-  const [getData, loopData] = useLazyAxios<{ in_loop: number[] }>({
-    url: `${environment.baseUrl}/inloop`,
-    headers: {
-      Accept: 'application/json',
-    },
-  });
+  const homeIcon = ({ focused, color, size }): ReactNode => {
+    // @ts-ignore
+    return <RadiatorIcon color={color} size={size} />;
+  };
 
-  axios.get(`${environment.baseUrl}/inloop`).then((data) => console.log(data.data));
+  const settingsIcon = ({ focused, color, size }): ReactNode => {
+    // @ts-ignore
+    return <CogIcon color={color} size={size} />;
+  };
 
-  const [inLoop, setInLoop] = useState(loopData?.data?.in_loop ?? []);
+  const [config, setConfig] = useState<Config | undefined>(undefined);
 
   React.useEffect(() => {
-    getData().catch(e => console.log(e));
-  }, []);
+    try {
+      AsyncStorage.getItem('@config').then(rawConfig => {
+        if (!rawConfig) {
+          throw new Error('Expected value but read null!');
+        } else {
+          const parsedConfig = JSON.parse(rawConfig);
+          if (!isConfig(parsedConfig)) {
+            throw new TypeError(`Expected Config but got ${typeof parsedConfig}`);
+          } else {
+            setConfig(parsedConfig as Config);
+          }
+        }
+      })
+    } catch (e) {
+      console.log('dupa');
+    }
+  }, [])
 
-  React.useEffect(
-    () => setInLoop(loopData?.data?.in_loop ?? []),
-    [loopData.data]
-  );
-
-  const [isRefreshing, setRefreshing] = useState(false);
-
-  const refresh = async () => {
-    setRefreshing(true);
-    await refetch();
-    await getData();
-    setRefreshing(false);
-  };
-
-  const updateLoop = (gpio: number, auto: boolean) => {
-    auto ? setInLoop([...inLoop, gpio]) : setInLoop(inLoop.filter(h => h !== gpio));
-  };
+  if (!config) return (
+    <StyledIndicatorView>
+      <ActivityIndicator color={colors.indigo["500"]} size='large' />
+    </StyledIndicatorView>
+  )
 
   return (
-    <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <FlatList
-          refreshControl={(
-            <RefreshControl
-              refreshing={isRefreshing}
-              onRefresh={refresh}
-            />
-          )}
-          // style={{ minHeight: Dimensions.get("window").height }}
-          contentInsetAdjustmentBehavior="automatic"
-          ListHeaderComponent={<HeadingText>Sterownik ogrzewania</HeadingText>}
-          ListEmptyComponent={<Text style={{ marginTop: 10, marginLeft: 10 }}>{  }</Text>}
-          data={data?.heaters ?? []}
-          extraData={inLoop}
-          keyExtractor={(i) => i.gpio.toString()}
-          renderItem={({ item }) => <HeaterCard name={item.name} gpio={item.gpio} active={item.active}
-                                                auto={inLoop.includes(item.gpio)} updateFunc={updateLoop} />} />
-      </SafeAreaView>
-    </>
+    <GlobalStateContext.Provider value={config}>
+      <NavigationContainer theme={scheme === 'dark' ? darkNavigationTheme : lightNavigationTheme }>
+        <Tab.Navigator screenOptions={{ headerShown: false }}>
+          <Tab.Screen name="Grzejniki" component={HomeScreen} options={{ tabBarIcon: homeIcon }} />
+          <Tab.Screen name="Ustawienia" component={SettingsScreen} options={{ tabBarIcon: settingsIcon }} />
+        </Tab.Navigator>
+      </NavigationContainer>
+    </GlobalStateContext.Provider>
   );
 };
-
-const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter
-  },
-  header: {
-    backgroundColor: "#143055",
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 24
-  },
-  logo: {
-    width: 200,
-    height: 180,
-    resizeMode: "contain"
-  },
-  heading: {
-    fontSize: 24,
-    fontWeight: "600",
-    color: Colors.lighter
-  },
-  body: {
-    backgroundColor: Colors.white
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: "600",
-    color: Colors.black
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: "400",
-    color: Colors.dark
-  },
-  highlight: {
-    fontWeight: "700"
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: "600",
-    padding: 4,
-    paddingRight: 12,
-    textAlign: "right"
-  },
-  link: {
-    color: "#45bc98"
-  },
-  githubStarContainer: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "center",
-    padding: 10
-  },
-  githubStarBadge: {
-    borderWidth: 1,
-    borderColor: Colors.dark,
-    borderRadius: 3,
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    fontWeight: "600"
-  }
-});
 
 export default App;
