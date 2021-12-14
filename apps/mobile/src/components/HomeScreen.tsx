@@ -3,22 +3,23 @@ import HeaterCard from "./HeaterCard";
 import React, { useState } from "react";
 import styled from "styled-components";
 import { useAxios, useLazyAxios } from "use-axios-client";
-import { ConfigDTO } from "@heating-front/utils";
 import environment from "../environments/environment";
-import axios from "axios";
+import { ConfigDTO, useContextConfig } from "@heating-front/utils";
+
+const HeadingText = styled(Text)`
+  color: #4F46E5;
+  font-size: 30px;
+  margin: 5px auto auto;
+  font-weight: bold;
+  background-color: transparent;
+`;
 
 const HomeScreen = () => {
 
-  const HeadingText = styled(Text)`
-    color: #4F46E5;
-    font-size: 30px;
-    margin: 5px auto auto;
-    font-weight: bold;
-    background-color: transparent;
-  `;
+  const { config } = useContextConfig();
 
   const { data, error, loading, refetch } = useAxios<ConfigDTO>({
-    url: `${environment.baseUrl}/config`,
+    url: `${config.address}/config`,
     headers: {
       Accept: "application/json"
     }
@@ -81,6 +82,6 @@ const HomeScreen = () => {
       </SafeAreaView>
     </>
   );
-}
+};
 
 export default HomeScreen;

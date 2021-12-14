@@ -1,6 +1,6 @@
 import Heater from "./Heater";
 
-export default interface ConfigDTO {
+export interface ConfigDTO {
   interval: number;
   duration: number;
   heaters: Heater[];

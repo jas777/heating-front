@@ -1,4 +1,4 @@
-export default interface Heater {
+export interface Heater {
   name: string,
   gpio: number,
   active: 'low' | 'high',

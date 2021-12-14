@@ -23,12 +23,10 @@ import HomeScreen from "../components/HomeScreen";
 import RadiatorIcon from "../assets/svg/RadiatorIcon.svg";
 import CogIcon from "../assets/svg/CogIcon.svg";
 import colors from "tailwindcss/colors";
-import Config from "../shared/Config";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { isConfig } from "../main";
 import styled from "styled-components";
+import { GlobalConfigContext, useConfig } from "@heating-front/utils";
+import SettingsScreen from "../components/SettingsScreen";
 
-const GlobalStateContext = React.createContext<Config | undefined>(undefined);
 
 const lightNavigationTheme = {
   ...DefaultTheme,
@@ -64,14 +62,6 @@ const App = () => {
 
   const scheme = useColorScheme();
 
-  function SettingsScreen() {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Settings!</Text>
-      </View>
-    );
-  }
-
   const Tab = createBottomTabNavigator();
 
   const homeIcon = ({ focused, color, size }): ReactNode => {
@@ -84,26 +74,7 @@ const App = () => {
     return <CogIcon color={color} size={size} />;
   };
 
-  const [config, setConfig] = useState<Config | undefined>(undefined);
-
-  React.useEffect(() => {
-    try {
-      AsyncStorage.getItem('@config').then(rawConfig => {
-        if (!rawConfig) {
-          throw new Error('Expected value but read null!');
-        } else {
-          const parsedConfig = JSON.parse(rawConfig);
-          if (!isConfig(parsedConfig)) {
-            throw new TypeError(`Expected Config but got ${typeof parsedConfig}`);
-          } else {
-            setConfig(parsedConfig as Config);
-          }
-        }
-      })
-    } catch (e) {
-      console.log('dupa');
-    }
-  }, [])
+  const { config, updateConfig } = useConfig();
 
   if (!config) return (
     <StyledIndicatorView>
@@ -112,14 +83,14 @@ const App = () => {
   )
 
   return (
-    <GlobalStateContext.Provider value={config}>
+    <GlobalConfigContext.Provider value={{ config, updateConfig }}>
       <NavigationContainer theme={scheme === 'dark' ? darkNavigationTheme : lightNavigationTheme }>
         <Tab.Navigator screenOptions={{ headerShown: false }}>
           <Tab.Screen name="Grzejniki" component={HomeScreen} options={{ tabBarIcon: homeIcon }} />
           <Tab.Screen name="Ustawienia" component={SettingsScreen} options={{ tabBarIcon: settingsIcon }} />
         </Tab.Navigator>
       </NavigationContainer>
-    </GlobalStateContext.Provider>
+    </GlobalConfigContext.Provider>
   );
 };
 

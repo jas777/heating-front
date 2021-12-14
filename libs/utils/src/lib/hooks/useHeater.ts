@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const useHeater = (auto: boolean, baseUrl: string, gpio: number, updateFunc?: (gpio: number, auto: boolean) => void) => {
+export const useHeater = (auto: boolean, baseUrl: string, gpio: number, updateFunc?: (gpio: number, auto: boolean) => void) => {
   const [isAuto, setAuto] = useState(auto);
 
   React.useEffect(() => {
@@ -44,5 +44,3 @@ const useHeater = (auto: boolean, baseUrl: string, gpio: number, updateFunc?: (g
   };
 
 };
-
-export default useHeater;

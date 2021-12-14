@@ -1,9 +1,5 @@
-import ConfigDTO from "./lib/dto/ConfigDTO";
-import Heater from "./lib/dto/Heater";
-import useHeater from "./lib/useHeater";
-
-export {
-  useHeater,
-  Heater,
-  ConfigDTO
-}
+export * from "./lib/hooks/useConfig";
+export * from "./lib/dto/ConfigDTO";
+export * from "./lib/dto/Heater";
+export * from "./lib/hooks/useHeater";
+export * from "./lib/types/Config";
